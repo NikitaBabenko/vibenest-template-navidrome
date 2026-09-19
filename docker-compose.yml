@@ -5,7 +5,7 @@ services:
     command:
       - /bin/sh
       - -ec
-      - chown -R 1000:1000 /data /music /upload-database /upload-config
+      - chown 1000:1000 /data /music /upload-database /upload-config
     volumes:
       - navidrome-data:/data
       - music-library:/music
@@ -67,6 +67,11 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
     expose:
       - "80"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/music-upload/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
     volumes:
       - music-library:/srv
       - upload-database:/database

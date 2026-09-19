@@ -96,6 +96,7 @@ cmp /tmp/ci-tone.wav /tmp/direct-play.wav
 
 curl -fsS "${base_url}/rest/createPlaylist.view?${subsonic_query}&name=CI%20Persistence&songId=${song_id}" >/dev/null
 docker compose -f docker-compose.yml -f docker-compose.ci.yml restart
+docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --force-recreate
 
 for _ in $(seq 1 60); do
   if curl -fsS "${base_url}/rest/ping.view?${subsonic_query}" >/dev/null; then
