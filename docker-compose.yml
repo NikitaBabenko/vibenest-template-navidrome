@@ -1,4 +1,24 @@
 services:
+  # Keep the public build service first for VibeNest's compose app detection.
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.gateway
+    user: "101:101"
+    restart: unless-stopped
+    depends_on:
+      - navidrome
+      - uploads
+    expose:
+      - "4533"
+    tmpfs:
+      - /tmp:noexec,nosuid,size=16m
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
   init-volumes:
     image: alpine:3.24.2@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
     user: "0:0"
@@ -76,25 +96,6 @@ services:
       - music-library:/srv
       - upload-database:/database
       - upload-config:/config
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile.gateway
-    user: "101:101"
-    restart: unless-stopped
-    depends_on:
-      - navidrome
-      - uploads
-    expose:
-      - "4533"
-    tmpfs:
-      - /tmp:noexec,nosuid,size=16m
-    read_only: true
     security_opt:
       - no-new-privileges:true
     cap_drop:
