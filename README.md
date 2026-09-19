@@ -16,6 +16,8 @@ The adapter keeps the upstream application unmodified and pins the production im
 
 VibeNest Free currently provides 256 MB RAM, 0.5 vCPU and 4 GB SSD. This adapter uses conservative defaults, but **Free suitability must be proven by runtime measurements before the public template claims it**.
 
+The production compose explicitly caps the three running services at 256 MiB / 0.5 CPU in total (Navidrome 176 MiB / 0.35 CPU, uploads 48 MiB / 0.10 CPU, gateway 32 MiB / 0.05 CPU). These limits also apply on a larger plan until you adjust the compose in your own fork; upgrading hardware alone does not remove the adapter caps.
+
 The intended Free path is direct play:
 
 1. Prefer MP3, AAC, Opus or another codec supported by the listening client.

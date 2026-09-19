@@ -5,6 +5,8 @@ services:
       context: .
       dockerfile: Dockerfile.gateway
     user: "101:101"
+    mem_limit: 32m
+    cpus: 0.05
     restart: unless-stopped
     depends_on:
       - navidrome
@@ -42,6 +44,8 @@ services:
   navidrome:
     image: deluan/navidrome:0.64.0@sha256:a384948b81bd1529986c5960169e7fc4fa00f46bde6bd517971a4c36671db2af
     user: "1000:1000"
+    mem_limit: 176m
+    cpus: 0.35
     restart: unless-stopped
     depends_on:
       init-volumes:
@@ -79,6 +83,8 @@ services:
       context: .
       dockerfile: Dockerfile.uploads
     user: "1000:1000"
+    mem_limit: 48m
+    cpus: 0.10
     restart: unless-stopped
     depends_on:
       init-volumes:
