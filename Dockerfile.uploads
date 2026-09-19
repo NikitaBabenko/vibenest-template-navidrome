@@ -1,0 +1,8 @@
+FROM filebrowser/filebrowser:v2.63.23@sha256:a469ea076d4a1b4b1d86a41d130f2f536cd9da996a2b1fb39c0d7635f9d89b9a
+
+USER root
+COPY upload-entrypoint.sh /vibenest-upload-entrypoint.sh
+RUN chmod 0755 /vibenest-upload-entrypoint.sh
+USER user
+
+ENTRYPOINT ["/vibenest-upload-entrypoint.sh"]

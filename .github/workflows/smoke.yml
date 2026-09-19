@@ -1,0 +1,33 @@
+name: Smoke
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compose-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate compose and shell
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml config --quiet
+          bash -n ci-smoke.sh
+      - name: Run bounded 256 MB smoke
+        run: bash ci-smoke.sh
+      - name: Upload resource evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: navidrome-smoke-evidence
+          path: |
+            resource-samples.tsv
+            navidrome.log
+          if-no-files-found: ignore
+          retention-days: 14

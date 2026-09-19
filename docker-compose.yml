@@ -1,0 +1,102 @@
+services:
+  init-volumes:
+    image: alpine:3.24.2@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
+    user: "0:0"
+    command:
+      - /bin/sh
+      - -ec
+      - chown -R 1000:1000 /data /music /upload-database /upload-config
+    volumes:
+      - navidrome-data:/data
+      - music-library:/music
+      - upload-database:/upload-database
+      - upload-config:/upload-config
+    restart: "no"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+
+  navidrome:
+    image: deluan/navidrome:0.64.0@sha256:a384948b81bd1529986c5960169e7fc4fa00f46bde6bd517971a4c36671db2af
+    user: "1000:1000"
+    restart: unless-stopped
+    depends_on:
+      init-volumes:
+        condition: service_completed_successfully
+    environment:
+      ND_ADDRESS: 0.0.0.0
+      ND_PORT: "4533"
+      ND_DATAFOLDER: /data
+      ND_MUSICFOLDER: /music
+      ND_LOGLEVEL: info
+      ND_ENABLELOGREDACTING: "true"
+      ND_ENABLEINSIGHTSCOLLECTOR: "false"
+      ND_ENFORCENONROOTUSER: "true"
+      ND_ENABLETRANSCODINGCONFIG: "false"
+      ND_TRANSCODING_MAXCONCURRENT: "1"
+      ND_TRANSCODING_MAXCONCURRENTPERUSER: "1"
+      ND_TRANSCODING_ENABLECANCELLATION: "true"
+      ND_TRANSCODINGCACHESIZE: 32MB
+      ND_IMAGECACHESIZE: 64MB
+      ND_ENABLEWEBPENCODING: "false"
+      ND_ENABLESHARING: "false"
+      ND_SCANNER_SCHEDULE: "@every 1h"
+    expose:
+      - "4533"
+    volumes:
+      - navidrome-data:/data
+      - music-library:/music:ro
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  uploads:
+    build:
+      context: .
+      dockerfile: Dockerfile.uploads
+    user: "1000:1000"
+    restart: unless-stopped
+    depends_on:
+      init-volumes:
+        condition: service_completed_successfully
+    environment:
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    expose:
+      - "80"
+    volumes:
+      - music-library:/srv
+      - upload-database:/database
+      - upload-config:/config
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  app:
+    image: nginx:1.31.6-alpine3.24@sha256:adad2ae9204d0fd7a34f40299bc838c3782be1293b10005eac4315ff5a1abf4e
+    user: "101:101"
+    restart: unless-stopped
+    depends_on:
+      - navidrome
+      - uploads
+    expose:
+      - "4533"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    tmpfs:
+      - /tmp:noexec,nosuid,size=16m
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  navidrome-data:
+  music-library:
+  upload-database:
+  upload-config:
