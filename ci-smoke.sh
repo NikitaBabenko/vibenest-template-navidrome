@@ -115,6 +115,8 @@ test -n "${upload_token_after_restart}"
 
 docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T navidrome test -f /music/ci-tone.wav
 docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T navidrome test -f /data/navidrome.db
+curl -fsS "${base_url}/rest/stream.view?${subsonic_query}&id=${song_id}&format=raw" -o /tmp/direct-play-after-redeploy.wav
+cmp /tmp/ci-tone.wav /tmp/direct-play-after-redeploy.wav
 docker compose -f docker-compose.yml -f docker-compose.ci.yml logs navidrome | tee navidrome.log
 grep -E 'transcoding=false|format=raw' navidrome.log
 docker stats --no-stream --format '{{.Name}}\t{{.MemUsage}}\t{{.CPUPerc}}'
