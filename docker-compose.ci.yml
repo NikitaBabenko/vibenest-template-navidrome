@@ -1,6 +1,6 @@
 services:
   navidrome:
-    mem_limit: 192m
+    mem_limit: 176m
     cpus: 0.35
 
   uploads:
@@ -8,7 +8,7 @@ services:
     cpus: 0.10
 
   app:
-    mem_limit: 16m
+    mem_limit: 32m
     cpus: 0.05
     ports:
       - "127.0.0.1:4533:4533"

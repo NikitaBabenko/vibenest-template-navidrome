@@ -17,15 +17,6 @@ trap cleanup EXIT
 export ADMIN_PASSWORD="${admin_password}"
 docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build
 
-for _ in $(seq 1 90); do
-  if curl -fsS "${base_url}/healthz" >/dev/null && curl -fsS "${base_url}/" >/dev/null; then
-    break
-  fi
-  sleep 2
-done
-curl -fsS "${base_url}/healthz"
-curl -fsS "${base_url}/" >/dev/null
-
 (
   while true; do
     printf '%s\t' "$(date -u +%FT%TZ)"
@@ -34,6 +25,26 @@ curl -fsS "${base_url}/" >/dev/null
   done
 ) > resource-samples.tsv &
 sampler_pid=$!
+
+ready=false
+for _ in $(seq 1 90); do
+  if curl -fsS "${base_url}/healthz" >/dev/null && curl -fsS "${base_url}/" >/dev/null; then
+    ready=true
+    break
+  fi
+  sleep 2
+done
+if [[ "${ready}" != "true" ]]; then
+  docker compose -f docker-compose.yml -f docker-compose.ci.yml ps -a
+  docker compose -f docker-compose.yml -f docker-compose.ci.yml logs
+  docker inspect --format '{{.Name}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} restarts={{.RestartCount}} error={{.State.Error}}' \
+    vibenest-template-navidrome-app-1 \
+    vibenest-template-navidrome-navidrome-1 \
+    vibenest-template-navidrome-uploads-1 || true
+  exit 1
+fi
+curl -fsS "${base_url}/healthz"
+curl -fsS "${base_url}/" >/dev/null
 
 python3 - <<'PY'
 import math
