@@ -39,6 +39,17 @@ The 4 GB disk limit includes the music library, database, artwork cache and cont
 
 The repository CI performs a bounded 256 MB compose smoke before VibeNest runtime validation. It uploads a generated two-second WAV through the real `/music-upload/` API, creates the first Navidrome admin, scans and direct-plays the file byte-for-byte, creates a playlist, restarts the stack, and verifies all state persists. CI evidence is preparatory only; it does not justify a public Free claim without measurements on VibeNest.
 
+### CI evidence snapshot
+
+[GitHub Actions run 35430863475](https://github.com/NikitaBabenko/vibenest-template-navidrome/actions/runs/35430863475) passed on 2026-09-19 for commit `b32f1cfd3bf2c5e2e867a40e13b2446c8952edf3` under the compose limits of 256 MB RAM and 0.5 vCPU. The sampler observed:
+
+- maximum combined sampled memory: 60.1 MiB;
+- maximum combined sampled CPU: 36.8% of one core;
+- Navidrome first import: one WAV track in 904.7 ms;
+- restart recovery: the administrator, upload login, music file, database and playlist all remained available.
+
+These are short GitHub-hosted CI observations, not production VibeNest peaks. A public Free-tier recommendation remains blocked until the same workload, plus an explicit bounded transcode check and a redeploy persistence check, passes on VibeNest.
+
 ## Pinned components and licenses
 
 - Navidrome `0.64.0` (multi-arch digest `sha256:a384948b…`) — GPL-3.0: https://github.com/navidrome/navidrome/tree/v0.64.0
